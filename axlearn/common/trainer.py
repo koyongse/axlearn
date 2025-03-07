@@ -601,14 +601,14 @@ class SpmdTrainer(Module):
                     )
                     self.vlog(3, "Done step %s", self.step)
                     num_steps += 1
-                    if num_steps % 100 == 0:
+                    if num_steps % 10 == 0 or self.step < 300:
                         now = time.perf_counter()
                         average_step_time = (now - start_time) / num_steps
                         self._step_log("Average step time: %s seconds", average_step_time)
                         self.summary_writer(self.step, {"average_step_time": average_step_time})
                         num_steps = 0
                         start_time = now
-                    if self.step >= cfg.max_step:
+                    if self.step >= 300:
                         self._step_log("Reached max_step=%s. Stopping", cfg.max_step)
                         break
                 if self.step < cfg.max_step:
