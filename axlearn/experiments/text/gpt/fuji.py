@@ -799,7 +799,7 @@ def get_trainer_kwargs(
                             MeshShapeModifier.default_config().set(
                                 # TP within the chip, FSDP across chips.
                                 # Each TRN2 chip has 4 XLA cores.
-                                mesh_shape=mesh_shape_from_axes(fsdp=-1, model=4)
+                                mesh_shape=mesh_shape_from_axes(data=-1, fsdp=128, model=4)
                             ),
                             RematSpecModifier.default_config().set(
                                 remat_policies={

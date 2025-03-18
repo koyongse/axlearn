@@ -3,7 +3,7 @@
 #SBATCH --output=/fsx/koyongse/slurm-logs/slurm-%j.log
 #SBATCH --job-name=koyongse
 #SBATCH --exclusive
-#SBATCH --nodes=8
+#SBATCH --nodes=64
 #SBATCH --partition dev
 
 DNAME="/fsx/koyongse/slurm-logs/slurm-${SLURM_JOB_ID}.out"
