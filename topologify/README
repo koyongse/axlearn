@@ -1,0 +1,19 @@
+Original scirpt (hostfile-topologify.org.py) is downloaded from:
+  https://code.amazon.com/packages/ElasticCollectivesMiscScripts/blobs/mainline/--/hostfile-topologify.py
+
+We need to accommodate ec2-topology-aware-for-slurm in FS cluster:
+  https://github.com/aws-samples/ec2-topology-aware-for-slurm
+
+Meanwhile, this is "how to topologify"
+
+1. Install necessary packages
+$ pip3 install boto3 pyopenssl # if not installed
+
+2. Prepare a fixed group of nodes, e.g.
+$ salloc --nodes=64 --job-name=<YOUR_ALIAS> --exclusive --partition dev 
+
+3. Create a host file
+$ scontrol show hostnames $(squeue --jobs ${JOBID} --noheader --format %N) > hosts
+
+4. Topologify
+$ python3 hostfile-topologify.py --output hosts.topologify --input hosts
