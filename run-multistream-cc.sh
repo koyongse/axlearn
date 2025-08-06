@@ -10,12 +10,13 @@
 #HOSTFILE_TOPOLOGIFIED=/fsx/koyongse/topologify/hosts.topologify
 
 # Neuron env vars for distributed training based on SLURM
-if [ -n "${HOSTFILE_TOPOLOGIFIED}" ]; then
-    nodes=$(cat ${HOSTFILE_TOPOLOGIFIED})
-else
-    nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")
-fi
+#if [ -n "${HOSTFILE_TOPOLOGIFIED}" ]; then
+#    nodes=$(cat ${HOSTFILE_TOPOLOGIFIED})
+#else
+#    nodes=$(scontrol show hostnames "$SLURM_JOB_NODELIST")
+#fi
 
+nodes=(localhost)
 num_nodes=${NODE_N:-$(echo "$nodes" | wc -l)}
 echo "${num_nodes} nodes"
 devices_per_node=64
@@ -23,7 +24,7 @@ MASTER_ADDR=$(echo "$nodes" | head -n 1)
 MASTER_PORT=41000
 JAX_COORDINATOR_PORT=41001
 
-HOMEDIR="/fsx/koyongse"
+HOMEDIR="/home/ubuntu/koyongse"
 
 export NEURON_RT_ROOT_COMM_ID="${MASTER_ADDR}:${MASTER_PORT}"
 export NEURON_PJRT_PROCESSES_NUM_DEVICES=$(printf '%s,' $(seq 1 $num_nodes | xargs -I {} echo $devices_per_node) | sed 's/,$//')
@@ -38,13 +39,13 @@ echo "NEURON_PJRT_PROCESS_INDEX=${NEURON_PJRT_PROCESS_INDEX}"
 sudo apt-get -f install -y
 sudo apt-get install -y google-perftools
 
-sudo dpkg -r aws-neuronx-tools aws-neuronx-devtools
-sudo dpkg -i ${HOMEDIR}/debs/tools/aws-neuronx-tools-*.deb ${HOMEDIR}/debs/tools/aws-neuronx-devtools-*.deb
+#sudo dpkg -r aws-neuronx-tools aws-neuronx-devtools
+#sudo dpkg -i ${HOMEDIR}/debs/tools/aws-neuronx-tools-*.deb ${HOMEDIR}/debs/tools/aws-neuronx-devtools-*.deb
 
 #sudo dpkg -i ${HOMEDIR}/neuron/aws-neuronx-dkms_2.x_amd64.deb
 #[[ $? != 0 ]] && exit 1
 
-sudo dpkg -r aws-neuronx-collectives aws-neuronx-runtime-lib
+#sudo dpkg -r aws-neuronx-collectives aws-neuronx-runtime-lib
 #sudo dpkg -i ${HOMEDIR}/debs/rtnccl/aws-neuronx-collectives*.deb ${HOMEDIR}/debs/rtnccl/aws-neuronx-runtime-lib*.deb
 
 # Print nodenames for debug
@@ -68,7 +69,7 @@ export NEURON_FSDP_NUM_LAYER_LATE_RS_SHIFT=2
 export NEURON_ENABLE_INT_MATMUL_DOWNCAST=1
 export NEURON_FSDP=1
 export NEURON_FSDP_NUM_LAYER_COALESCE=-1
-export NEURON_FSDP_CC_MULTISTREAM=1
+export NEURON_FSDP_CC_MULTISTREAM=0
 export NEURON_RUN_TRIVIAL_COMPUTATION_ON_CPU=1
 
 if [ -n "$DEBUG_DUMP" ]; then
@@ -89,7 +90,7 @@ export NEURON_RT_ASYNC_EXEC_MAX_INFLIGHT_REQUESTS=1
 export NEURON_RT_IO_RING_CACHE_SIZE=0
 export NEURON_RT_VIRTUAL_CORE_SIZE=2
 export NEURON_RT_RESET_CORES=1
-export NEURON_RT_LOG_LEVEL="WARNING"
+#export NEURON_RT_LOG_LEVEL="WARNING"
 export NEURON_RT_ENABLE_INTERNODE_EXECUTION_BARRIER=1
 export NEURON_RT_CC_ALG_TYPES=^INTER_RDH_ALG
 
@@ -100,7 +101,7 @@ export NEURON_RT_CC_ALG_TYPES=^INTER_RDH_ALG
 # Neuron collectives flag
 export FI_LOG_LEVEL="warn"
 export OFI_NCCL_PROTOCOL=RDMA
-export LD_LIBRARY_PATH="${HOMEDIR}/neuron/lib:/opt/amazon/efa/lib/"
+#export LD_LIBRARY_PATH="${HOMEDIR}/neuron/lib:/opt/amazon/efa/lib/"
 export FI_EFA_USE_DEVICE_RDMA="1"
 export FI_PROVIDER="efa"
 export FI_EFA_FORK_SAFE=1
@@ -142,7 +143,7 @@ else
 fi
 
 # JAX Cache
-export JAX_COMPILATION_CACHE_DIR="${TEST_ARTIFACTS_PATH}/jax_cache"
+export JAX_COMPILATION_CACHE_DIR="${HOMEDIR}/jax_cache"
 mkdir -p ${JAX_COMPILATION_CACHE_DIR}
 
 deactivate
@@ -150,7 +151,7 @@ deactivate
 # eval "$(/fsx/apoorvgu/conda/bin/conda shell.bash hook)"
 # conda activate py310
 
-source ${HOMEDIR}/venvs/jax/bin/activate
+source ${HOMEDIR}/venv/bin/activate
 
 echo "Listing apt dependencies"
 apt list --installed | grep neuron
